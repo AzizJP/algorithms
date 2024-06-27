@@ -1,4 +1,4 @@
-// ОТЧЕТ по ссылке https://contest.yandex.ru/contest/22450/run-report/115467666/
+// ОТЧЕТ по ссылке https://contest.yandex.ru/contest/22450/run-report/115559135/
 
 const _readline = require("readline");
 
@@ -15,35 +15,35 @@ _reader.on("line", (line) => {
 
 const readValue = () => _inputLines[_curLine++];
 
-const getMiddleOfIndexes = (a, b) => Math.ceil((b - a) / 2);
-
-const getNullIndexes = (arr) => {
-  const finalArr = [];
-  arr.forEach((number, index) => {
-    if (number === 0) finalArr.push(index);
+const getDistancesOfLeftNull = (plotNumbers) => {
+  let distanceOfLeftNull = 0;
+  let passedFirstNull = false;
+  return plotNumbers.map((number) => {
+    if (number === 0) {
+      passedFirstNull = true;
+      distanceOfLeftNull = 0;
+      return distanceOfLeftNull;
+    }
+    if (!passedFirstNull) {
+      distanceOfLeftNull = plotNumbers.length;
+      return distanceOfLeftNull;
+    }
+    distanceOfLeftNull++;
+    return distanceOfLeftNull;
   });
-  return finalArr;
 };
 
-const getDistances = (length, plotNumbers) => {
-  const distances = [];
-  const nullIndexes = getNullIndexes(plotNumbers);
-  let currentNullIndex = 0;
+const getDistances = (plotNumbers) => {
+  const distancesOfLeftNull = getDistancesOfLeftNull(plotNumbers);
+  const distancesOfRightNull = getDistancesOfLeftNull(
+    [...plotNumbers].reverse()
+  ).reverse();
 
-  const getTransitionIndex = () =>
-    nullIndexes[currentNullIndex] +
-    getMiddleOfIndexes(
-      nullIndexes[currentNullIndex],
-      nullIndexes[currentNullIndex + 1]
-    );
-
-  for (let i = 0; i <= length - 1; i++) {
-    if (i === getTransitionIndex()) {
-      currentNullIndex++;
-    }
-
-    distances.push(Math.abs(nullIndexes[currentNullIndex] - i));
-  }
+  const distances = plotNumbers.map((number, index) => {
+    if (distancesOfLeftNull[index] > distancesOfRightNull[index])
+      return distancesOfRightNull[index];
+    return distancesOfLeftNull[index];
+  });
 
   return distances.join(" ");
 };
@@ -54,7 +54,7 @@ const solve = () => {
     .split(" ")
     .map((i) => Number(i));
 
-  const distances = getDistances(length, plotNumbers);
+  const distances = getDistances(plotNumbers);
 
   console.log(distances);
 };
