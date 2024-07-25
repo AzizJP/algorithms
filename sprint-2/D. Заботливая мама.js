@@ -7,11 +7,22 @@ if (process.env.REMOTE_JUDGE !== "true") {
   }
 }
 
-function solution(node, idx) {
+function solution(node, elem) {
+  let index = 0;
+  let isFinded = false;
+
   while (node) {
-    process.stdout.write(`${node.value} -> `);
+    if (node.value === elem) {
+      isFinded = true;
+      break;
+    }
     node = node.next;
+    index++;
   }
+
+  if (!isFinded) index = -1;
+
+  return index;
 }
 
 function test() {
@@ -19,6 +30,6 @@ function test() {
   var node2 = new Node("node2", node3);
   var node1 = new Node("node1", node2);
   var node0 = new Node("node0", node1);
-  var newHead = solution(node0, 1);
-  // result is node0 -> node2 -> node3
+  var idx = solution(node0, "node2");
+  // result is idx === 2
 }
