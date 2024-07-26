@@ -1,11 +1,1 @@
-10
-put -34
-put -23
-get
-size
-get
-size
-get
-get
-put 80
-size
+4 2 * 4 / 25 * 2 - 12 / 1000 +
