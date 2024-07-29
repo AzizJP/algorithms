@@ -13,18 +13,23 @@
 
 -- ДОКАЗАТЕЛЬСТВО КОРРЕКТНОСТИ --
 Алгоритм корректно выполняет все операции с деком в соответствии с ожиданиями. 
-ОТЧЕТ по ссылке https://contest.yandex.ru/contest/22781/run-report/116391068/
+ОТЧЕТ по ссылке https://contest.yandex.ru/contest/22781/run-report/116460682/
 
 Методы добавления проверяют, заполнен ли дек, и в случае переполнения возвращают ошибку. 
 Аналогично, методы удаления проверяют, пуст ли дек, и в случае пустоты возвращают ошибку.
 
 -- ВРЕМЕННАЯ СЛОЖНОСТЬ --
+Пусть 
+n - количество входных команд
+m - максимальный размер дека
+
+Поскольку мы проходим через все команды один раз, 
+общая временная сложность составляет O(n)
 Все операции добавления и удаления (push_front, push_back, pop_front, pop_back) выполняются за O(1),
 так как они включают лишь простые манипуляции с индексами и массивом.
 
 -- ПРОСТРАНСТВЕННАЯ СЛОЖНОСТЬ --
-Пространственная сложность алгоритма составляет O(n),
-где n — максимальный размер дека.
+Пространственная сложность алгоритма составляет O(m)
 */
 
 const _readline = require("readline");
@@ -59,65 +64,77 @@ class Deque {
     return this.queueSize === this.maxSize;
   }
 
-  push_back(value) {
-    if (this._isFull()) return console.log("error");
+  _increaseIterator(previousIteratorValue) {
+    return (previousIteratorValue + 1) % this.maxSize;
+  }
+
+  _decreaseIterator(previousIteratorValue) {
+    return (previousIteratorValue - 1 + this.maxSize) % this.maxSize;
+  }
+
+  pushBack(value) {
+    if (this._isFull()) throw new Error();
 
     this.queue[this.tail] = value;
-    this.tail = (this.tail + 1) % this.maxSize;
+    this.tail = this._increaseIterator(this.tail);
     this.queueSize += 1;
   }
 
-  push_front(value) {
-    if (this._isFull()) return console.log("error");
+  pushFront(value) {
+    if (this._isFull()) throw new Error();
 
-    this.head = (this.head - 1 + this.maxSize) % this.maxSize;
+    this.head = this._decreaseIterator(this.head);
     this.queue[this.head] = value;
     this.queueSize += 1;
   }
 
-  pop_front() {
-    if (this._isEmpty()) return console.log("error");
+  popFront() {
+    if (this._isEmpty()) throw new Error();
 
     const x = this.queue[this.head];
     this.queue[this.head] = null;
-    this.head = (this.head + 1) % this.maxSize;
+    this.head = this._increaseIterator(this.head);
     this.queueSize -= 1;
 
-    return console.log(x);
+    return x;
   }
 
-  pop_back() {
-    if (this._isEmpty()) return console.log("error");
+  popBack() {
+    if (this._isEmpty()) throw new Error();
 
-    this.tail = (this.tail - 1 + this.maxSize) % this.maxSize;
+    this.tail = this._decreaseIterator(this.tail);
     const x = this.queue[this.tail];
     this.queue[this.tail] = null;
     this.queueSize -= 1;
 
-    return console.log(x);
+    return x;
   }
 }
+
+const map = {
+  push_back: "pushBack",
+  push_front: "pushFront",
+  pop_front: "popFront",
+  pop_back: "popBack",
+};
+
+const handleCommand = (deque, command) => {
+  try {
+    const [commandName, argument] = command.split(" ");
+    if (argument) {
+      deque[map[commandName]](Number(argument));
+    } else {
+      console.log(deque[map[commandName]]());
+    }
+  } catch {
+    console.log("error");
+  }
+};
 
 const createOutput = (dequeSize, commands) => {
   const deque = new Deque(Number(dequeSize));
 
-  commands.forEach((command) => {
-    const [commandName, argument] = command.split(" ");
-    switch (commandName) {
-      case "push_back":
-        deque.push_back(Number(argument));
-        break;
-      case "push_front":
-        deque.push_front(Number(argument));
-        break;
-      case "pop_front":
-        deque.pop_front();
-        break;
-      case "pop_back":
-        deque.pop_back();
-        break;
-    }
-  });
+  commands.forEach((command) => handleCommand(deque, command));
 };
 
 const solve = () => {
