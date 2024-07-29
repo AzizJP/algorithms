@@ -9,17 +9,22 @@
 
 -- ДОКАЗАТЕЛЬСТВО КОРРЕКТНОСТИ --
 Использование стека гарантирует правильный порядок операций, соответствует ожидаемому результату и правилам вычисления ОПН.
-ОТЧЕТ по ссылке https://contest.yandex.ru/contest/22781/run-report/116394584/
+ОТЧЕТ по ссылке https://contest.yandex.ru/contest/22781/run-report/116481793/
 
 -- ВРЕМЕННАЯ СЛОЖНОСТЬ --
+Пусть 
+n — количество элементов в выражении
+
 Обработка каждого элемента выражения происходит за O(1) времени, 
 так как операции с числом и стеком занимают постоянное время. 
 Поскольку мы проходим через все элементы выражения один раз, 
-общая временная сложность составляет O(n), где n — количество элементов в выражении.
+общая временная сложность составляет O(n).
 
 -- ПРОСТРАНСТВЕННАЯ СЛОЖНОСТЬ --
-Пространственная сложность алгоритма составляет O(n),
-где n — количество чисел в выражении.
+Стэк и массив rpnElements занимают O(n) памяти каждый, т.к. зависят от количества входных данных
+Переменные head и prevHead для хранения промежуточных значений и мапа операций занимают O(1) памяти
+
+Следовательно, пространственная сложность алгоритма составляет O(n).
 */
 
 const _readline = require("readline");
@@ -37,26 +42,14 @@ _reader.on("line", (line) => {
 
 const readValue = () => _inputLines[_curLine++];
 
-const processOperator = (operator, stack) => {
-  const head = stack.pop();
-  const prevHead = stack.pop();
-  switch (operator) {
-    case "+":
-      stack.push(prevHead + head);
-      break;
-    case "-":
-      stack.push(prevHead - head);
-      break;
-    case "*":
-      stack.push(prevHead * head);
-      break;
-    case "/":
-      stack.push(Math.floor(prevHead / head));
-      break;
-  }
+const operations = {
+  "+": (a, b) => a + b,
+  "-": (a, b) => a - b,
+  "*": (a, b) => a * b,
+  "/": (a, b) => Math.floor(a / b),
 };
 
-const createOutput = (reversePolishNotation) => {
+const evaluateRPN = (reversePolishNotation) => {
   const stack = [];
   const rpnElements = reversePolishNotation.split(" ");
 
@@ -64,18 +57,24 @@ const createOutput = (reversePolishNotation) => {
     if (!isNaN(element)) {
       stack.push(Number(element));
     } else {
-      processOperator(element, stack);
+      const head = stack.pop();
+      const prevHead = stack.pop();
+      const operation = operations[element];
+
+      if (operation) {
+        stack.push(operation(prevHead, head));
+      }
     }
   });
 
-  const result = stack.pop();
-  console.log(result);
+  return stack.pop();
 };
 
 const solve = () => {
   const reversePolishNotation = readValue();
 
-  createOutput(reversePolishNotation);
+  const result = evaluateRPN(reversePolishNotation);
+  console.log(result);
 };
 
 process.stdin.on("end", solve);
