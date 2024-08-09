@@ -5,7 +5,7 @@ const { spawn } = require("child_process");
 const input = fs.readFileSync("input.txt", "utf8");
 
 // Запуск основного скрипта
-const process = spawn("node", ["sprint-4/final/B. Хеш-таблица.js"]);
+const process = spawn("node", ["sprint-4/H. Подстроки.js"]);
 
 // Передача содержимого файла как стандартный ввод для основного скрипта
 process.stdin.write(input);
