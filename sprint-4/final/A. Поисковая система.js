@@ -13,7 +13,7 @@
 -- ДОКАЗАТЕЛЬСТВО КОРРЕКТНОСТИ --
 Алгоритм корректно строит инвертированный индекс и на основе него рассчитывает релевантность документов по каждому запросу. 
 Сортировка по убыванию релевантности и фильтрация топ-5 документов обеспечивает требуемую функциональность.
-ОТЧЕТ по ссылке https://contest.yandex.ru/contest/24414/run-report/116701993/
+ОТЧЕТ по ссылке https://contest.yandex.ru/contest/24414/run-report/116748928/
 
 -- ВРЕМЕННАЯ СЛОЖНОСТЬ --
 Пусть 
@@ -21,15 +21,15 @@ n - количество документов,
 l - максимальное количество слов в документе,
 m - количество запросов,
 k - количество уникальных слов в запросе,
-t - максимальное количество документов, содержащих слово.  
+t - максимальное количество документов, содержащих слово.
 d - количество релевантных документов, равном значению numberOfRelevantDocuments
 
 Создание инвертированного индекса: 
   Сложность создания инвертированного индекса составляет O(n * l).
 Обработка запросов: 
   Для каждого запроса сложность поиска релевантных документов составляет O(k * t).
-  Сортировка релевантных документов занимает O(d log d).
-  Таким образом, сложность обработки всех запросов - O(m * (k * t + d log d)).
+  Сортировка релевантных документов занимает O(n * d), в нашем случае d можно пренебречь
+  Таким образом, сложность обработки всех запросов - O(m * (k * t + n * d)).
 Кэширование:
   Использование кэша позволяет ускорить повторную обработку одних и тех же запросов, 
   снижая временные затраты до O(1) при повторных вызовах.
@@ -111,17 +111,34 @@ const processQueryWithInvertedIndex = (
 const sortAndFilterRelevances = (relevances) => {
   const relevancesWithIndex = relevances
     .map((rel, index) => ({ relevance: rel, index }))
-    .filter((rel) => rel.relevance > 0)
-    .slice(0, numberOfRelevantDocuments);
+    .filter((rel) => rel.relevance > 0);
 
-  relevancesWithIndex.sort((a, b) => {
-    if (b.relevance === a.relevance) {
-      return a.index - b.index;
+  const result = [];
+
+  relevancesWithIndex.forEach((item) => {
+    let inserted = false;
+
+    for (let i = 0; i < result.length; i++) {
+      if (
+        item.relevance > result[i].relevance ||
+        (item.relevance === result[i].relevance && item.index < result[i].index)
+      ) {
+        result.splice(i, 0, item);
+        inserted = true;
+        break;
+      }
     }
-    return b.relevance - a.relevance;
+
+    if (!inserted) {
+      result.push(item);
+    }
+
+    if (result.length > numberOfRelevantDocuments) {
+      result.pop();
+    }
   });
 
-  return relevancesWithIndex.map((rel) => rel.index + 1);
+  return result.map((rel) => rel.index + 1);
 };
 
 const createOutput = (documents, queries, documentsLength) => {
