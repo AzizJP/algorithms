@@ -1,12 +1,9 @@
-9
-i like dfs and bfs
-i like dfs dfs
-i like bfs with bfs and bfs
-i like dfs and bfs
-i like dfs dfs
-i like bfs with bfs and bfs
-i like dfs and bfs
-i like dfs dfs
-i like bfs with bfs and bfs
-1
-dfs dfs dfs dfs bfs
+8
+get 9
+delete 9
+put 9 1
+get 9
+put 9 2
+get 9
+put 9 3
+get 9

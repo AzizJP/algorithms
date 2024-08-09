@@ -16,22 +16,22 @@
 -- ДОКАЗАТЕЛЬСТВО КОРРЕКТНОСТИ --
 Алгоритм корректно обрабатывает коллизии с помощью цепочек и поддерживает базовые операции с хэш-таблицей: вставку, поиск и удаление данных. 
 Использование простого числа в качестве размера таблицы снижает вероятность возникновения длинных цепочек и равномерно распределяет ключи по таблице.
-ОТЧЕТ по ссылке https://contest.yandex.ru/contest/24414/run-report/116703288/
+ОТЧЕТ по ссылке https://contest.yandex.ru/contest/24414/run-report/116749535/
 
 -- ВРЕМЕННАЯ СЛОЖНОСТЬ --
 Пусть
-k — длина цепочки в данном индексе.
+n - количество команд
+k - количество элементов в цепочке
 
-Вставка (put): В среднем: O(1) — если цепочки короткие. В худшем случае: O(k) — если цепочка длинная.
-Поиск (get): В среднем: O(1) — если цепочки короткие. В худшем случае: O(k) — если цепочка длинная.
-Удаление (delete): В среднем: O(1) — если цепочки короткие. В худшем случае: O(k) — если цепочка длинная.
+Методы хэш-таблицы выполняются в среднем за O(1), в худшем случае за O(k)
+Общая временная сложность в среднем составляет O(n), в худшем случае O(n * k)
+
 
 -- ПРОСТРАНСТВЕННАЯ СЛОЖНОСТЬ --
 Пусть
 m — размер таблицы (число ячеек)
-n — количество пар "ключ-значение"
 
-Пространственная сложность хэш-таблицы определяется её размером и количеством элементов: O(m + n).
+Пространственная сложность хэш-таблицы определяется её размером и количеством команд: O(m + n).
 */
 
 const _readline = require("readline");
@@ -42,6 +42,7 @@ const _reader = _readline.createInterface({
 
 const _inputLines = [];
 let _curLine = 0;
+const NONE = "None";
 
 _reader.on("line", (line) => {
   _inputLines.push(line);
@@ -52,15 +53,22 @@ const readValue = () => _inputLines[_curLine++];
 class HashTable {
   constructor(size) {
     this.size = size;
-    this.table = new Array(size).fill(null).map(() => []);
+    this.table = new Array(size);
   }
 
   _hash(key) {
     return Math.abs(key) % this.size;
   }
 
+  _fillCell(hashIndex) {
+    if (!this.table[hashIndex]) {
+      this.table[hashIndex] = [];
+    }
+  }
+
   put(key, value) {
     const hashIndex = this._hash(key);
+    this._fillCell(hashIndex);
     const chain = this.table[hashIndex];
 
     for (let i = 0; i < chain.length; i++) {
@@ -74,6 +82,7 @@ class HashTable {
 
   get(key) {
     const hashIndex = this._hash(key);
+    this._fillCell(hashIndex);
     const chain = this.table[hashIndex];
 
     for (let i = 0; i < chain.length; i++) {
@@ -81,21 +90,32 @@ class HashTable {
         return chain[i][1];
       }
     }
-    return "None";
+    return NONE;
+  }
+
+  _swapAndRemove(chain, index) {
+    const lastIndex = chain.length - 1;
+
+    if (index !== lastIndex) {
+      [chain[index], chain[lastIndex]] = [chain[lastIndex], chain[index]];
+    }
+
+    chain.pop();
   }
 
   delete(key) {
     const hashIndex = this._hash(key);
+    this._fillCell(hashIndex);
     const chain = this.table[hashIndex];
 
     for (let i = 0; i < chain.length; i++) {
       if (chain[i][0] === key) {
         const value = chain[i][1];
-        chain.splice(i, 1);
+        this._swapAndRemove(chain, i);
         return value;
       }
     }
-    return "None";
+    return NONE;
   }
 }
 
