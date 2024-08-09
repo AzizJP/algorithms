@@ -17,12 +17,12 @@
 
 -- ВРЕМЕННАЯ СЛОЖНОСТЬ --
 Пусть 
-n - количество документов
-l - среднее количество слов в документе.
-m - количество запросов
-k - количество слов в запросе.
-t - среднее количество документов, содержащих слово.
-d - количество документов.
+n - количество документов,
+l - максимальное количество слов в документе,
+m - количество запросов,
+k - количество уникальных слов в запросе,
+t - максимальное количество документов, содержащих слово.  
+d - количество релевантных документов, равном значению numberOfRelevantDocuments
 
 Создание инвертированного индекса: 
   Сложность создания инвертированного индекса составляет O(n * l).
@@ -36,15 +36,13 @@ d - количество документов.
 
 -- ПРОСТРАНСТВЕННАЯ СЛОЖНОСТЬ --
 Пусть 
-w - количество уникальных слов во всех документах
-d - среднее количество документов
-m - количество уникальных запросов
-d - количество документов
+w - количество уникальных слов в документе
+p - количество уникальных запросов
 
 Инвертированный индекс: 
-  Требует O(w * d) памяти, в которых встречается слово.
+  Требует O(w * n) памяти, в которых встречается слово.
 Кэш: 
-  Пространственная сложность для кэша - O(m * d)
+  Пространственная сложность для кэша - O(p * d)
 Дополнительная память: 
   Для хранения списка релевантности, промежуточных массивов и результатов сортировки используется O(d) памяти.
 */
@@ -57,6 +55,7 @@ const _reader = _readline.createInterface({
 
 const _inputLines = [];
 let _curLine = 0;
+const numberOfRelevantDocuments = 5;
 
 _reader.on("line", (line) => {
   _inputLines.push(line);
@@ -112,7 +111,8 @@ const processQueryWithInvertedIndex = (
 const sortAndFilterRelevances = (relevances) => {
   const relevancesWithIndex = relevances
     .map((rel, index) => ({ relevance: rel, index }))
-    .filter((rel) => rel.relevance > 0);
+    .filter((rel) => rel.relevance > 0)
+    .slice(0, numberOfRelevantDocuments);
 
   relevancesWithIndex.sort((a, b) => {
     if (b.relevance === a.relevance) {
@@ -121,7 +121,7 @@ const sortAndFilterRelevances = (relevances) => {
     return b.relevance - a.relevance;
   });
 
-  return relevancesWithIndex.slice(0, 5).map((rel) => rel.index + 1);
+  return relevancesWithIndex.map((rel) => rel.index + 1);
 };
 
 const createOutput = (documents, queries, documentsLength) => {
