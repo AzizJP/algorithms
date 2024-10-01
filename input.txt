@@ -1,9 +1,6 @@
-8
-get 9
-delete 9
-put 9 1
-get 9
-put 9 2
-get 9
-put 9 3
-get 9
+5
+alla 0 0
+gena 0 0
+gosha 0 0
+rita 0 0
+timofey 0 0

@@ -9,24 +9,22 @@ if (process.env.REMOTE_JUDGE !== "true") {
 }
 
 function solution(root) {
-  let leftHeads = 0;
-  let rightHeads = 0;
-
-  const findMaxValue = (head) => {
-    if (head.left) {
-      findMaxValue(head.left);
+  function checkBalance(node) {
+    if (node === null) {
+      return [true, 0];
     }
-    if (head.right) {
-      findMaxValue(head.right);
-    }
-  };
 
-  findMaxValue(root.left);
-  findMaxValue(root.right);
+    const [leftBalanced, leftHeight] = checkBalance(node.left);
+    const [rightBalanced, rightHeight] = checkBalance(node.right);
 
-  const diffs = Math.abs(leftHeads - rightHeads);
-  if (diffs === 0 || diffs === 1) return "True";
-  return "Fasle";
+    const balanced =
+      leftBalanced && rightBalanced && Math.abs(leftHeight - rightHeight) <= 1;
+    const height = Math.max(leftHeight, rightHeight) + 1;
+
+    return [balanced, height];
+  }
+
+  return checkBalance(root)[0];
 }
 
 function test() {
